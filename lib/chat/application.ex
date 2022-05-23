@@ -11,6 +11,8 @@ defmodule Chat.Application do
       {Task.Supervisor, name: Chat.TaskSupervisor}
     ]
 
+    IO.puts("Node name: #{Node.self()}")
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Chat.Supervisor]
