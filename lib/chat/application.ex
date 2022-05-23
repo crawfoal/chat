@@ -12,6 +12,7 @@ defmodule Chat.Application do
     ]
 
     if Application.get_env(:plug, :run) do
+      IO.puts("Plug on... will listen on port #{Application.get_env(:plug, :port)}")
       children = children ++ {
         Plug.Cowboy, scheme: :http, plug: Chat.Router, options: [
           port: Application.get_env(:plug, :port)
