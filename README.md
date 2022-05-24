@@ -6,7 +6,7 @@ created this as an experiment to see how to dyno to dyno communication works in
 a private space and if it could be used to run distributed Elixir/Erlang
 applications.
 
-## Deployment
+## Deployment to a Heroku Private Space
 
 Initialize a git repo and commit your code:
 ```
@@ -39,8 +39,8 @@ $ heroku restart --app < app name >
 
 ### See the Distributed Messaging
 
-todo: update this section (and the code) to use actual DNS Service Discovery
-rather than just the private IPs
+_todo: update this section (and the code) to use actual DNS Service Discovery
+rather than just the private IPs_
 
 Review the logs of the dyno you wish to talk to. E.g. if you want to send a
 moebi dyno a message, then run
@@ -64,7 +64,33 @@ nil
 iex(amanda@0.0.0.1)2>
 ```
 
+If you are still tailing `moebi` logs, you should see
+```
+2022-05-24T04:01:03.861744+00:00 app[moebi.1]: Hello from Amanda!
+```
+
 ### How It Works
+
+In the Elixir School's distribution lesson, you create a simple mix project that
+implements `Chat.send_message/2`. This function takes two arguments, first the
+ndoe to send the message to, and second the message - a string which will then
+be logged to stdout on the node that recieved the message. A special node,
+`moebi` is implemented which will always respond to the caller with "chicken?"
+(as in, you should expect that to be logged to your stdout if you send moebi a
+message).
+
+With a few changes, this application can be deployed to Heroku Private Space to
+run as a distributed cluster:
+- Adjust the special handling for `moebi` to not explicitly refer to
+  `localhost`. You can see how I implemented this in the `Chat` module.
+- Create a Procfile that defines the various node types and how they should
+  start up. Make sure to specify a long name and a shared cookie (all nodes in a
+  cluster must use the same cookie).
+
+Plug is added simply because Heroku apps must have a web process type, and those
+dynos must bind to `$PORT` within 60 seconds of start up. This application has a
+slight modification on the typical Plug setup so that it only starts on `web`
+dynos. You can see details in `Chat.Application.start/2`.
 
 ## Local Setup
 
@@ -82,6 +108,4 @@ Finally, you can start up a node with
 ```
 $ iex --sname < short node name > -S mix
 ```
-
-### See the Distributed Messaging
 
